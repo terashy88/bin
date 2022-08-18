@@ -1,0 +1,4 @@
+#!/bin/bash
+
+if prime-run ;then prime-run; else
+if
