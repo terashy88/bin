@@ -1,0 +1,56 @@
+#!/usr/bin/bash
+## Arch-script version
+
+#mount			#bootloader-size +100m
+echo 'mount /dev/sda2 /mnt/'
+echo 'mkdir /mnt/boot/efi'
+echo 'mount /dev/sda1 /mnt/boot/efi'
+
+#! Test >>>> network-manager-applet dialog mtools dosfstools linux-headers bluez bluez-utils git  xdg-utils xdg-user-dirs wpa_supplicant wireless_tools reflector
+#systemctl
+## Arch-linux
+echo 'pacstrap /mnt --needed --noconfirm base base-devel efibootmgr linux linux-firmware zsh vim networkmanager grub acpid ntp dbus avahi cups cronie lightdm lightdm-slick-greeter auto-cpufreq intel-ucode xfce4'
+## Manjaro
+basestrap /mnt base sudo networkmanager linux5** links vim grub mkinitcpio
+
+manjaro-chroot /mnt
+
+echo 'genfstab -p /mnt >> /mnt/etc/fstab'
+echo 'arch-chroot /mnt/'
+echo 'pc' > /etc/hostname
+# echo '127.0.0.1	localhost' >> /ets hosts
+# echo '::1		localhost' >> /ets hosts
+# echo '127.0.1.1 xps.localdomain	pc' >> /ets hosts
+ln -s /usr/share/zoneinfo/Europe/Zurich /etc/localtime
+echo 'sudo hwclock --systohc'
+echo 'KEYMAP=de_CH-latin1 \nFONT=ter-122n' > /etc/vconsole.conf		#! \n not working
+echo 'LANG=de_CH.UTF-8' > /etc/locale.conf
+#! sudo echo ('LANGUAGE=de_CH.UTF-8 \nLC_ALL=de_CH.UTF-8 \nLC_MESSAGES=de_CH.UTF-8 \nLANG=de_CH.UTF-8 \n > /etc/locale.conf')
+#vim /etc/locale.gen'
+echo 'locale-gen'
+echo timedatectl set-ntp true &
+#!sudo systemctl enable --now auto-cpufreq.service &
+journalctl --vacuum-size=33M &
+systemctl enable --now systemd-timesyncd
+systemctl enable --now NetworkManager &
+
+
+#useradd
+echo 'useradd -mG wheel shaderico'
+#passwd
+#passwd @user
+
+#Grub
+echo 'grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=grub'
+echo 'grub-mkconfig -o /boot/grub/grub.cfg'
+echo 'mkinitcpio -p linux'
+
+sudo systemctl enable lightdm
+
+
+#EOL
+echo 'exit'
+echo 'umount -a'
+echo 'reboot'
+
+echo 'sudo systemctl enable --now NetworkManager'
