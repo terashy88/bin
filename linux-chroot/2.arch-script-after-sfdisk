@@ -1,0 +1,71 @@
+#!/usr/bin/bash
+# #  Arch-script version
+
+# #  Partition blocksize
+lsblk
+
+# #  Cryptroot version
+sudo cryptsetup open /dev/** 'luks'
+sudo mount /dev/mapper/luks /mnt
+
+# mount			# bootloader-size +280m
+mount /dev/path /mnt
+mkdir /mnt/boot/efi
+mount /dev/path /mnt/boot/efi
+
+# #  nmcli / nmtui
+nmcli device wifi list
+nmcli device wifi connect SSID_or_BSSID password password
+nmcli connection show
+
+#! Test >>>> network-manager-applet dialog mtools dosfstools linux-headers bluez bluez-utils git  xdg-utils xdg-user-dirs wpa_supplicant wireless_tools reflector
+# systemctl
+# #  Arch-linux
+pacstrap /mnt --needed --noconfirm base base-devel efibootmgr linux linux-firmware zsh vim networkmanager grub acpid ntp dbus avahi cups cronie lightdm lightdm-slick-greeter intel-ucode xfce4
+# #  Manjaro
+basestrap /mnt base sudo networkmanager linux6** links vim grub mkinitcpio
+
+manjaro-chroot /mnt
+
+genfstab -p /mnt >>/mnt/etc/fstab
+arch-chroot /mnt/
+$HOSTNAME >/etc/hostname
+
+#  127.0.0.1	localhost           >> /ets hosts
+#  ::1		localhost           >> /ets hosts
+#  127.0.1.1 xps.localdomain	pc >> /ets hosts
+
+ln -s /usr/share/zoneinfo/Europe/Zurich /etc/localtime
+sudo hwclock --systohc
+KEYMAP=de_CH-latin1 >/etc/vconsole.conf
+LANG=de_CH.UTF-8 >/etc/locale.conf
+#! sudo ('LANGUAGE=de_CH.UTF-8 \nLC_ALL=de_CH.UTF-8 \nLC_MESSAGES=de_CH.UTF-8 \nLANG=de_CH.UTF-8 \n > /etc/locale.conf')
+# vim /etc/locale.gen
+locale-gen
+timedatectl set-ntp true
+#!sudo systemctl enable --now auto-cpufreq.service
+journalctl --vacuum-size=33M
+systemctl enable --now systemd-timesyncd
+systemctl enable --now NetworkManager
+
+# useradd
+useradd -mG wheel shaderico
+# passwd
+# passwd @user
+
+# Grub
+sudo grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=grub --recheck
+
+sudo update-grub #! are
+grub-mkconfig -o /boot/grub/grub.cfg
+
+mkinitcpio -p linux
+
+sudo systemctl enable lightdm
+
+# EOL
+exit
+umount -a
+reboot
+
+sudo systemctl enable --now NetworkManager
