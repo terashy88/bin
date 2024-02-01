@@ -1,8 +1,10 @@
 #!/usr/bin/bash
-# #  Arch-script version
+# Arch-script version
 
-# #  Partition blocksize
-lsblk
+# check Disk partition
+lsblk_() {
+    lsblk
+}
 
 # #  Cryptroot version
 sudo cryptsetup open /dev/** 'luks'
@@ -18,7 +20,7 @@ nmcli device wifi list
 nmcli device wifi connect SSID_or_BSSID password password
 nmcli connection show
 
-#! Test >>>> network-manager-applet dialog mtools dosfstools linux-headers bluez bluez-utils git  xdg-utils xdg-user-dirs wpa_supplicant wireless_tools reflector
+#! Test >>>> network-manager-applet dialog mtools dosfstools linux-headers bluez bluez-utils git  xdg-utils xdg-user-dirs wpa_supplicant wireless_tools
 # systemctl
 # #  Arch-linux
 pacstrap /mnt --needed --noconfirm base base-devel efibootmgr linux linux-firmware zsh vim networkmanager grub acpid ntp dbus avahi cups cronie lightdm lightdm-slick-greeter intel-ucode xfce4

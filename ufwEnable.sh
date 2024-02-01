@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
-# Check if ufw is running
-if ! pgrep -x "ufw" >/dev/null; then
-    # Check if ufw is enabled
-    if ! sudo ufw status | grep -q "Status: active"; then
+firewall_() {
+    # Check if ufw is running
+    if ! sudo systemctl status "ufw" | grep "active" >/dev/null; then
         # Activate ufw
         echo 'Your Firewall is not active'
-        sudo ufw enable
+        echo 'activating...'
+        sudo ufw enable || true
+
     fi
-fi
+}
+firewall_
