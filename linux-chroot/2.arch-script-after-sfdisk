@@ -1,37 +1,75 @@
 #!/usr/bin/bash
 # Arch-script version
 
-# check Disk partition
-lsblk_() {
-    lsblk
-}
+# Acer Bios
+F2
 
-# #  Cryptroot version
+# check Disk partition
+lsblk
+
+#   Cryptroot version
 sudo cryptsetup open /dev/** 'luks'
 sudo mount /dev/mapper/luks /mnt
 
 # mount			# bootloader-size +280m
-mount /dev/path /mnt
-mkdir /mnt/boot/efi
-mount /dev/path /mnt/boot/efi
+sudo mount /dev/ <path >/mnt
+mkdir -p /mnt/boot/efi
+sudo mount /dev/ <path >/mnt/boot/efi
 
-# #  nmcli / nmtui
+lsblk
+
+#   nmcli / nmtui
 nmcli device wifi list
 nmcli device wifi connect SSID_or_BSSID password password
 nmcli connection show
 
-#! Test >>>> network-manager-applet dialog mtools dosfstools linux-headers bluez bluez-utils git  xdg-utils xdg-user-dirs wpa_supplicant wireless_tools
 # systemctl
-# #  Arch-linux
-pacstrap /mnt --needed --noconfirm base base-devel efibootmgr linux linux-firmware zsh vim networkmanager grub acpid ntp dbus avahi cups cronie lightdm lightdm-slick-greeter intel-ucode xfce4
-# #  Manjaro
-basestrap /mnt base sudo networkmanager linux6** links vim grub mkinitcpio
+#  Arch-linux
+pacstrap -K /mnt base linux linux-firmware
+arch-chroot /mnt/
 
+# sudo  Manjaro
+basestrap /mnt base sudo networkmanager linux6** nvim grub mkinitcpio
 manjaro-chroot /mnt
 
+# switch User
+su  $USER
+
+# fstab optional
 genfstab -p /mnt >>/mnt/etc/fstab
-arch-chroot /mnt/
+
 $HOSTNAME >/etc/hostname
+
+# useradd
+useradd -mG wheel terashy
+# passwd
+# passwd @user
+
+# Package Manager
+pacman -Syu --needed --noconfirm grub intel-ucode zsh efibootmgr plasma sudo nvim base-devel git
+# amd or intel          --> amd-ucode, intel-ucode
+# < DisplayManager >    --> xfce4, plasma
+# < loginManager >      --> lightdm lightdm-slick-greeter, sddm
+#todo check if needed:  acpid ntp dbus avahi cups cronie    #! Test >>>> network-manager-applet dialog mtools dosfstools linux-headers bluez bluez-utils git  xdg-utils xdg-user-dirs wpa_supplicant wireless_tools
+
+# Grub
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=grub --recheck
+
+grub-mkconfig -o /boot/grub/grub.cfg
+
+mkinitcpio -p linux
+
+# EOL
+exit
+umount -a
+reboot
+
+sudo systemctl enable --now NetworkManager
+# sudo systemctl enable lightdm
+# sudo systemctl enable --now sddm
+
+# -----------------------------------------------
+# todo
 
 if [[ ! -f /etc/hosts ]]; then
     cat >/etc/hosts <<<EOF
@@ -49,29 +87,5 @@ LANG=de_CH.UTF-8 >/etc/locale.conf
 # vim /etc/locale.gen
 locale-gen
 timedatectl set-ntp true
-#!sudo systemctl enable --now auto-cpufreq.service
 journalctl --vacuum-size=33M
 systemctl enable --now systemd-timesyncd
-systemctl enable --now NetworkManager
-
-# useradd
-useradd -mG wheel terashy
-# passwd
-# passwd @user
-
-# Grub
-sudo grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=grub --recheck
-
-sudo update-grub #! are
-grub-mkconfig -o /boot/grub/grub.cfg
-
-mkinitcpio -p linux
-
-sudo systemctl enable lightdm
-
-# EOL
-exit
-umount -a
-reboot
-
-sudo systemctl enable --now NetworkManager
