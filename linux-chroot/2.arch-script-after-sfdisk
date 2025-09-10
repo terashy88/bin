@@ -7,6 +7,7 @@ F2
 # check Disk partition
 lsblk
 
+
 #   Cryptroot version
 sudo cryptsetup open /dev/** 'luks'
 sudo mount /dev/mapper/luks /mnt
@@ -39,6 +40,37 @@ su  $USER
 genfstab -p /mnt >>/mnt/etc/fstab
 
 $HOSTNAME >/etc/hostname
+
+# useradd
+useradd -mG wheel terashy
+# passwd
+# passwd @user
+
+# Package Manager
+pacman -Syu --needed --noconfirm grub intel-ucode zsh efibootmgr plasma sudo nvim base-devel git
+# amd or intel          --> amd-ucode, intel-ucode
+# < DisplayManager >    --> xfce4, plasma
+# < loginManager >      --> lightdm lightdm-slick-greeter, sddm
+#todo check if needed:  acpid ntp dbus avahi cups cronie    #! Test >>>> network-manager-applet dialog mtools dosfstools linux-headers bluez bluez-utils git  xdg-utils xdg-user-dirs wpa_supplicant wireless_tools
+
+# Grub
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=grub --recheck
+
+grub-mkconfig -o /boot/grub/grub.cfg
+
+mkinitcpio -p linux
+
+# EOL
+exit
+umount -a
+reboot
+
+sudo systemctl enable --now NetworkManager
+# sudo systemctl enable lightdm
+# sudo systemctl enable --now sddm
+
+# -----------------------------------------------
+# todo
 
 # useradd
 useradd -mG wheel terashy
